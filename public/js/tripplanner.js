@@ -1,24 +1,74 @@
 $( document ).ready(function() {
+		var hotelExists = false;
+    	var restaurantLocations = [];
+    	var thingToDoLocations = [];
+    	initialize_gmaps();
+    	var lastHotelId;
+
     $('.selection-panel').on('click','button',function(){
     	var $button = $(this);
 
+
     	var $selected = $button.siblings('select').find('option:selected');
     	typeName = $button.siblings('h4').text();
-    	//console.log($selected, $selected.text());
-    	console.log("hotels",all_hotels);
-    	console.log("name",typeName);
+
     	var typeArray = getType(typeName);
     	var eName = $selected.text();
     	var typeStr = typeArray[1];
     	var result =  $.grep(typeArray[0], function(e){
     		return e.name==eName;
     	});
-    	var $itineraryList = $(typeStr).children('.list-group')
-    	.append('<div class="itinerary-item"><span class="title">'+eName+'</span><button class="btn btn-xs btn-danger remove btn-circle">x</button></div>');
-    	//console.log($itineraryList);
-    	//append to itinerary, the text
+
+    	var $locationListElement = $(typeStr).children('.list-group');
+    	if(typeStr[1]=='h' && hotelExists){
+    		//deletes marker
+    		deleteMarker(lastHotelId);
+    		// updates list - replace existing
+    		$locationListElement.find('span').text(eName);
+    	}
+    	else{
+	    	$locationListElement
+	    	.append('<div class="itinerary-item"><span class="title">'
+	    		+eName+'</span><button class="btn btn-xs btn-danger remove btn-circle">x</button></div>');
+		}
+
+    	var locationArr = result[0].place[0].location;
+    	if(typeStr[1]=='h'){
+			hotelExists = true;
+			lastHotelId = drawLocation(locationArr, {
+	          icon: '/images/lodging_0star.png'
+	        }, eName, typeStr);
+	    }
+		else if(typeStr[1]=='r'){
+			drawLocation(locationArr, {
+	        	icon: '/images/restaurant.png'
+	      	},eName, typeStr);
+	    }
+		else if(typeStr[1]=='t'){
+			drawLocation(locationArr, {
+            	icon: '/images/star-3.png'
+          	},eName, typeStr);
+
+		}
+
+
     	//update the map
     });
+
+	$('.itinerary-panel').on('click','button',function(){
+		// var marker = getMarker(markers,'Tamarind');
+		// console.log(marker);
+		var $button = $(this);
+		var placeName = $button.siblings('span').text();
+    	
+		var markerToRemove = getMarker(markers, placeName);
+		if(markerToRemove.type[1] =='h'){
+			hotelExists =false;
+		}
+		deleteMarker(markerToRemove.id);
+		//if we just deleted a hotel, make hotelExists=false or hotelExistsArr=[]
+		$button.parent().remove();
+	});
 });
 
 //function that searches thingstodo
@@ -34,4 +84,10 @@ var getType = function(typeName){
 	else if(typeName== 'Things To Do'){
 		return [all_things_to_do,'#things-list'];
 	}
+};
+
+var getMarker = function(markers, eName){
+	return $.grep(markers, function(marker){
+    		return marker.name==eName;
+    	})[0];
 };

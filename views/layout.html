@@ -33,7 +33,36 @@
     <script src="js/tripplanner.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB42AYjF5WC-5w1kNK5lvKFkwWN4I4MhGM&sensor=true"></script>
     <script>
-      function initialize_gmaps() {
+
+     var map;
+     var count = 0;
+     var markers = [];
+
+     function drawLocation (location, opts, locationName, typeStr) {
+          if (typeof opts !== 'object') opts = {};
+          opts.position = new google.maps.LatLng(location[0], location[1]);
+          opts.map = map;
+          opts.id = count++;
+          opts.name = locationName;
+          opts.type = typeStr;
+          var marker = new google.maps.Marker(opts);
+          markers[opts.id]= marker;
+          return marker.id;
+
+      }
+
+      var deleteMarker = function(id){
+
+          var marker = markers[id];
+          marker.setMap(null);
+
+      }
+
+     function initialize_gmaps() {
+
+       // var hotelLocation = hotelLocation || [];
+       // var restaurantLocations = restaurantLocation || [];
+       // var thingToDoLocations = thingToDoLocation || [];
         // initialize new google maps LatLng object
         var myLatlng = new google.maps.LatLng(40.705189,-74.009209);
         // set the map options hash
@@ -46,40 +75,25 @@
         // get the maps div's HTML obj
         var map_canvas_obj = document.getElementById("map-canvas");
         // initialize a new Google Map with the options
-        var map = new google.maps.Map(map_canvas_obj, mapOptions);
-        // Add the marker to the map
-        var marker = new google.maps.Marker({
-          position: myLatlng,
-          title:"Hello World!"
-        });
-        var hotelLocation = [];
-        var restaurantLocations = [];
-        var thingToDoLocations = [];
+        map = new google.maps.Map(map_canvas_obj, mapOptions);
 
-        function drawLocation (location, opts) {
-          if (typeof opts !== 'object') opts = {};
-          opts.position = new google.maps.LatLng(location[0], location[1]);
-          opts.map = map;
-          var marker = new google.maps.Marker(opts);
-        }
-        drawLocation(hotelLocation, {
-          icon: '/images/lodging_0star.png'
-        });
-        restaurantLocations.forEach(function (loc) {
-          drawLocation(loc, {
-            icon: '/images/restaurant.png'
-          });
-        });
-        thingToDoLocations.forEach(function (loc) {
-          drawLocation(loc, {
-            icon: '/images/star-3.png'
-          });
-        });
+        
+
+        // drawLocation(hotelLocation, {
+        //   icon: '/images/lodging_0star.png'
+        // });
+        // restaurantLocations.forEach(function (loc) {
+        //   drawLocation(loc, {
+        //     icon: '/images/restaurant.png'
+        //   });
+        // });
+        // thingToDoLocations.forEach(function (loc) {
+        //   drawLocation(loc, {
+        //     icon: '/images/star-3.png'
+        //   });
+        // });
       }
 
-      $(document).ready(function() {
-        initialize_gmaps();
-      });
 
       var styleArr = [
         {
