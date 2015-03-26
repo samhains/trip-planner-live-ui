@@ -10,7 +10,7 @@
     <div id="control-panel" class="col-sm-4 col-lg-3 clearfix">
       <div class="col-xs-6 col-sm-12">
         <div class="panel panel-default">
-          <div class="panel-body">
+          <div class="panel-body selection-panel">
             <div>
               <h4>Hotels</h4>
               <select>
@@ -58,33 +58,33 @@
             </div>
           </div>
           <div class="panel-body">
-            <div>
-              <h4>My Hotel</h4>
+            <div id="hotel-list">
+              <h4 >My Hotel</h4>
               <ul class="list-group">
                 <div class="itinerary-item">
-                  <span class="title">Andaz Wall Street</span><button class="btn btn-xs btn-danger remove btn-circle">x</button>
+               <!--   <span class="title">Andaz Wall Street</span><button class="btn btn-xs btn-danger remove btn-circle">x</button> -->
                 </div>
               </ul>
             </div>
-            <div>
+            <div id="restaurant-list">
               <h4>My Restaurants</h4>
               <ul class="list-group">
                 <div class="itinerary-item">
-                  <span class="title">Bouley</span><button class="btn btn-xs btn-danger remove btn-circle">x</button>
+
                 </div>
                 <div class="itinerary-item">
-                  <span class="title">The Capital Grille</span><button class="btn btn-xs btn-danger remove btn-circle">x</button>
+
                 </div>
               </ul>
             </div>
-            <div>
-              <h4>My Things To Do</h4>
+            <div id="things-list">
+              <h4 >My Things To Do</h4>
               <ul class="list-group">
                 <div class="itinerary-item">
-                  <span class="title">Mahayana Buddhist Temple Association</span><button class="btn btn-xs btn-danger remove btn-circle">x</button>
+
                 </div>
                 <div class="itinerary-item">
-                  <span class="title">South Street Seaport</span><button class="btn btn-xs btn-danger remove btn-circle">x</button>
+
                 </div>
               </ul>
             </div>
@@ -97,9 +97,9 @@
   <script>
     // here we use swig to turn the `hotels` into a stringified representation. But because we add this string to some JS in a script tag, when the client loads it, it will actually set that object as a variable. So now we have an `all_hotels` array on the front-end — check it out in your console!
     {% autoescape false %}
-    var all_hotels = {{ hotels | json }};
-    var all_restaurants = {{ restaurants | json }};
-    var all_things_to_do = {{ thingsToDo | json }};
+    var all_hotels = {{ hotels|json }};
+    var all_restaurants = {{ restaurants|json }};
+    var all_things_to_do = {{ thingsToDo|json }};
     {% endautoescape %}
   </script>
 
