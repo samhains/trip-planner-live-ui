@@ -69,6 +69,19 @@ $( document ).ready(function() {
 		//if we just deleted a hotel, make hotelExists=false or hotelExistsArr=[]
 		$button.parent().remove();
 	});
+
+	$('.day-buttons').on('click','button',function(){
+		var $button= $(this);
+
+		var numOfDays = $('.day-buttons').children().length-1;
+		if($button.text() =='+'){
+			$button.prev().after('<button class="btn btn-circle day-btn">'+(numOfDays+1)+'</button>');
+		}
+		else{
+			$button.siblings().removeClass('current-day');
+			$button.addClass('current-day');
+		}
+	});
 });
 
 //function that searches thingstodo
