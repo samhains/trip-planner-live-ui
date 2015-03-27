@@ -216,19 +216,20 @@ $( document ).ready(function() {
       var narrowBounds = function(){
       	//debugger;
       	var day = daysArray[currDay];
-      	day.bounds = new google.maps.LatLngBounds();
+      	temp = new google.maps.LatLngBounds();
 
       	day.markersArray.forEach(function(marker){
       		if(marker.visible){
       			var position = marker.position;
-      			day.bounds.extend(position);
+      			temp.extend(position);
 
       		}
       		
       	});
-      	if(!day.bounds.isEmpty())
+      	if(!temp.isEmpty()){
+      		day.bounds = temp;
       		map.fitBounds(day.bounds);
-
+		}
 
       };
 
