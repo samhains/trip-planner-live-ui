@@ -90,11 +90,12 @@ $( document ).ready(function() {
 		var $button = $(this);
 		var placeName = $button.siblings('span').text();
 
-		var markerToRemove = getMarker(daysArray[currDay], placeName);
+		var markerToRemove = getMarker(daysArray[currDay].markersArray, placeName);
 
 		if(markerToRemove.type[1] =='h'){
-			hotelExists =false;
+			daysArray[currDay].hotelExists =false;
 		}
+		console.log(markerToRemove.id);
 		deleteMarker(markerToRemove.id);
 		$button.parent().remove();
 	});
@@ -204,9 +205,35 @@ $( document ).ready(function() {
 
       }
 
+
       var deleteMarker = function(id){
           var marker = daysArray[currDay].markersArray[id];
+          console.log("DELETE MARKER");
+          marker.name = null;
+          marker.setVisible(false);
           marker.setMap(null);
+          narrowBounds();
+
+      };
+
+      var narrowBounds = function(){
+      	//debugger;
+      	var day = daysArray[currDay];
+      	day.bounds = new google.maps.LatLngBounds();
+
+      	day.markersArray.forEach(function(marker){
+      		if(marker.visible){
+      			console.log('marker',marker);
+      			var position = marker.position;
+      			day.bounds.extend(position);
+
+      		}
+      		
+      	});
+      	console.log('bounds',day.bounds);
+
+      	map.fitBounds(day.bounds);
+
 
       };
 
