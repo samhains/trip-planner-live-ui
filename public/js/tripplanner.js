@@ -7,6 +7,7 @@ $( document ).ready(function() {
     		this.currMarkerId = 0;
     		this.markersArray = [];
     		this.lastHotelId= null;
+    		this.bounds = new google.maps.LatLngBounds();
     	};
     	var daysArray = [new Day()];
     	var currDay = 0;
@@ -130,17 +131,25 @@ $( document ).ready(function() {
 
 		}
 
-		//remove  current day and adjust information
+
+	});
+
+	//remove  current day and adjust information
 		$('#day-title').on('click','button',function(){
 			console.log(currDay);
+			//num of days counts buttons including 'plus', remove another
+			// for index 
+			var numOfDays = $('.day-buttons').children().length-2;
 
 			removeDay(currDay);
 			daysArray.splice(currDay,1);
+			if(currDay==numOfDays) currDay--;
 			renderDay(currDay);
+
+			$('.day-buttons').find('.btn-plus').prev().remove();
 
 
 		});
-	});
 
 	var removeDay = function(day){
 		//removes all itinerary items from current day from dom
@@ -153,13 +162,17 @@ $( document ).ready(function() {
 
 		});
 
+
+
+
 	};
 
 	var renderDay = function(day){
 
 		//show curr days markers
-		debugger;
+		//debugger;
 		var currMarkers = daysArray[day].markersArray;
+
 		currMarkers.forEach(function(marker){
 			marker.setVisible(true);
 			var typeStr = marker.type;
@@ -184,6 +197,8 @@ $( document ).ready(function() {
           opts.type = typeStr;
           var marker = new google.maps.Marker(opts);
           daysArray[currDay].markersArray[opts.id] = marker;
+          daysArray[currDay].bounds.extend(marker.position);
+          map.fitBounds(daysArray[currDay].bounds);
           //markers[opts.id]= marker;
           return marker.id;
 
