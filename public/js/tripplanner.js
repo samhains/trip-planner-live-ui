@@ -95,7 +95,6 @@ $( document ).ready(function() {
 		if(markerToRemove.type[1] =='h'){
 			daysArray[currDay].hotelExists =false;
 		}
-		console.log(markerToRemove.id);
 		deleteMarker(markerToRemove.id);
 		$button.parent().remove();
 	});
@@ -137,7 +136,6 @@ $( document ).ready(function() {
 
 	//remove  current day and adjust information
 		$('#day-title').on('click','button',function(){
-			console.log(currDay);
 			//num of days counts buttons including 'plus', remove another
 			// for index 
 			var numOfDays = $('.day-buttons').children().length-2;
@@ -208,11 +206,10 @@ $( document ).ready(function() {
 
       var deleteMarker = function(id){
           var marker = daysArray[currDay].markersArray[id];
-          console.log("DELETE MARKER");
           marker.name = null;
           marker.setVisible(false);
           marker.setMap(null);
-          narrowBounds();
+      	  narrowBounds();
 
       };
 
@@ -223,16 +220,14 @@ $( document ).ready(function() {
 
       	day.markersArray.forEach(function(marker){
       		if(marker.visible){
-      			console.log('marker',marker);
       			var position = marker.position;
       			day.bounds.extend(position);
 
       		}
       		
       	});
-      	console.log('bounds',day.bounds);
-
-      	map.fitBounds(day.bounds);
+      	if(!day.bounds.isEmpty())
+      		map.fitBounds(day.bounds);
 
 
       };
