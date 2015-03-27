@@ -1,11 +1,14 @@
 $( document ).ready(function() {
-		var hotelExists = false;
     	var restaurantLocations = [];
     	var thingToDoLocations = [];
     	initialize_gmaps();
-    	var lastHotelId;
-    	var daysArray = [[]];
-    	var daysObj = [{hotelExists: false, currMarkerId: 0, markerArray: [] }];
+    	var Day = function(){
+    		this.hotelExists = false;
+    		this.currMarkerId = 0;
+    		this.markersArray = [];
+    		this.lastHotelId= null;
+    	};
+    	var daysArray = [new Day()];
     	var currDay = 0;
     	var prevDay;
     	var map;
@@ -43,9 +46,9 @@ $( document ).ready(function() {
     	var $locationListElement = $(typeStr).children('.list-group');
 
     	//special rules for hotel
-    	if(typeStr[1]=='h' && hotelExists){
+    	if(typeStr[1]=='h' && daysArray[currDay].hotelExists){
     		//deletes marker
-    		deleteMarker(lastHotelId);
+    		deleteMarker(daysArray[currDay].lastHotelId);
     		// updates list - replace existing
     		$locationListElement.find('span').text(eName);
     	}
@@ -59,8 +62,8 @@ $( document ).ready(function() {
 		//************ GOOGLE MAPS MARKER DRAWING SECTION ************************
     	var locationArr = result[0].place[0].location;
     	if(typeStr[1]=='h'){
-			hotelExists = true;
-			lastHotelId = drawLocation(locationArr, {
+			daysArray[currDay].hotelExists = true;
+			daysArray[currDay].lastHotelId = drawLocation(locationArr, {
 	          icon: '/images/lodging_0star.png'
 	        }, eName, typeStr, currDay);
 	    }
@@ -109,8 +112,8 @@ $( document ).ready(function() {
 		if($button.text() =='+'){
 			$button.prev().after('<button class="btn btn-circle day-btn">'+(numOfDays+1)+'</button>');
 
-			count[numOfDays] = 0;
-			daysArray[numOfDays] = [];
+			daysArray[numOfDays] = new Day();
+
 		}
 		else{
 			//switching a day
@@ -144,7 +147,7 @@ $( document ).ready(function() {
 		$('.itinerary-item').remove();
 
 		//hide previous days markers
-		var markersToRemove = daysArray[day];
+		var markersToRemove = daysArray[day].markersArray;
 		markersToRemove.forEach(function(marker){
 			marker.setVisible(false);
 
@@ -155,7 +158,8 @@ $( document ).ready(function() {
 	var renderDay = function(day){
 
 		//show curr days markers
-		var currMarkers = daysArray[day];
+		debugger;
+		var currMarkers = daysArray[day].markersArray;
 		currMarkers.forEach(function(marker){
 			marker.setVisible(true);
 			var typeStr = marker.type;
@@ -175,20 +179,18 @@ $( document ).ready(function() {
           if (typeof opts !== 'object') opts = {};
           opts.position = new google.maps.LatLng(location[0], location[1]);
           opts.map = map;
-          opts.id = count[currDay]++;
+          opts.id = daysArray[currDay].currMarkerId++;
           opts.name = locationName;
           opts.type = typeStr;
           var marker = new google.maps.Marker(opts);
-          var markers = daysArray[currDay];
-          markers[opts.id] = marker;
+          daysArray[currDay].markersArray[opts.id] = marker;
           //markers[opts.id]= marker;
           return marker.id;
 
       }
 
       var deleteMarker = function(id){
-      		console.log(daysArray,currentDay,id);
-          var marker = daysArray[currDay][id];
+          var marker = daysArray[currDay].markersArray[id];
           marker.setMap(null);
 
       };
