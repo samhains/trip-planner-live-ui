@@ -34,8 +34,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
 // root route
-app.get('/', require('./routes'));
-app.get('/days', Days);
+app.use('/', require('./routes'));
+app.use('/days', Days);
 // catch 404 (i.e., no routes were hit) and forward to error handler
 app.use(function(req, res, next) {
   console.log("404040404");

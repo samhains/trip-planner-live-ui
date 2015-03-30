@@ -19,7 +19,13 @@ $( document ).ready(function() {
         type: "GET",
         url:'/days',
         success: function(days){
-            console.log(days);
+          console.log(days);
+          days.forEach(function(day){
+
+          });
+            
+            var numOfDays = days.length;
+            console.log(days.length);
         },
         error: function(err){
           console.log(err);

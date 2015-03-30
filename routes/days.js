@@ -3,27 +3,26 @@ var Day = require('../models').Day;
 
 
 
-router.get('/days', function (req, res, next){
-  // Day.find({},function(error,days){
-  //   if(err) return next(err);
+router.get('/', function (req, res, next){
+  Day.find({},function(error,days){
+    if(error) return next(error);
 
-  //   res.send(days);
-  // });
-  // 
-  res.send('HEY');
+    res.send(days);
+  });
+
 
 });
-// router.get('/days/:id', function (req, res, next){
+// router.get('/:id', function (req, res, next){
 //   //get day by day ID
 
 // });
 
-router.delete('/days/:id', function (req, res, next){
+router.delete('/:id', function (req, res, next){
   //delete day by id
 
 });
 
-router.post('/days/:id', function (req, res, next){
+router.post('/:id', function (req, res, next){
   //create a new day
   //create new object for mongoose daySchema
   console.log("post request");
@@ -37,7 +36,7 @@ router.post('/days/:id', function (req, res, next){
 });
 
 
-router.put('/days/:id', function (req, res, next){
+router.put('/:id', function (req, res, next){
   //this is where you update individual markers for the day
   res.send("Days");
 
