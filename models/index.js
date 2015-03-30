@@ -42,5 +42,6 @@ module.exports = {
   Place:      mongoose.model('Place', placeSchema),
   Hotel:      mongoose.model('Hotel', hotelSchema),
   ThingToDo:  mongoose.model('ThingToDo', thingToDoSchema),
-  Restaurant: mongoose.model('Restaurant', restaurantSchema)
+  Restaurant: mongoose.model('Restaurant', restaurantSchema),
+  Day: mongoose.model('Day',daySchema)
 };

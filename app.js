@@ -7,6 +7,7 @@ var express    = require('express'),
 
 // app instantiation
 var app = express();
+var Days =  require('./routes/days.js');
 
 // view engine
 app.set('views', __dirname + '/views');
@@ -34,9 +35,10 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 // root route
 app.get('/', require('./routes'));
-
+app.get('/days', Days);
 // catch 404 (i.e., no routes were hit) and forward to error handler
 app.use(function(req, res, next) {
+  console.log("404040404");
   var err = new Error('Not Found');
   err.status = 404;
   next(err);

@@ -15,6 +15,17 @@ $( document ).ready(function() {
     	var map;
     	var count = [0];
 
+      $.ajax({
+        type: "GET",
+        url:'/days',
+        success: function(days){
+            console.log(days);
+        },
+        error: function(err){
+          console.log(err);
+        }
+      });
+
     	//when document loads we need to set up map to Day 1
 
     $('.selection-panel').on('click','button',function(){
@@ -114,6 +125,16 @@ $( document ).ready(function() {
 			$button.prev().after('<button class="btn btn-circle day-btn">'+(numOfDays+1)+'</button>');
 
 			daysArray[numOfDays] = new Day();
+      $.ajax({
+        type: "POST",
+        url: '/days/'+numOfDays,
+        success: function(days){
+          console.log(days);
+        },
+        error: function(error){
+          console.log(error);
+        }
+      });
 
 		}
 		else{
@@ -195,6 +216,7 @@ $( document ).ready(function() {
           opts.name = locationName;
           opts.type = typeStr;
           var marker = new google.maps.Marker(opts);
+
           daysArray[currDay].markersArray[opts.id] = marker;
           daysArray[currDay].bounds.extend(marker.position);
           map.fitBounds(daysArray[currDay].bounds);
