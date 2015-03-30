@@ -12,7 +12,7 @@ $( document ).ready(function() {
 
         /*
         var Marker = {
-  
+
         }
         this.position = new google.maps.LatLng(location[0], location[1]);
           this.map = map;
@@ -21,7 +21,7 @@ $( document ).ready(function() {
           this.type = typeStr;
          */
 
-    	var daysArray = [new Day()];
+    	var daysArray = [];
     	var currDay = 0;
     	var prevDay;
     	var map;
@@ -31,25 +31,52 @@ $( document ).ready(function() {
         type: "GET",
         url:'/days',
         success: function(days){
-          console.log(days.length);
-          if (days.length == 0){
-
-          $.ajax({
-              type: "POST",
-              url: '/days/0',
-              success: function(days){
-                console.log(days);
-              },
-              error: function(error){
-                console.log(error);
-              }
-          });
-
-
+          console.log("hello",days.length);
+          if (days.length === 0){
+            daysArray = [new Day()];
+            $('.day-buttons').append('<button class="btn btn-circle day-btn current-day">1</button>');
+            $('.day-buttons').append('<button class="btn btn-circle day-btn btn-plus">+</button>');
+            //if there are no days, create new day
+            $.ajax({
+                type: "POST",
+                url: '/days/0',
+                success: function(days){
+                  console.log(days);
+                },
+                error: function(error){
+                  console.log(error);
+                }
+            });
           }else{
-          days.forEach(function(day){
-          });
-          }
+            var thisDay = 0;
+            days.forEach(function(day){
+              daysArray.push(new Day());
+              console.log(day);
+              var hotel = day[0];
+              var restaraunts= day[1];
+              var things = day[2];
+              if (hotel){
+                drawLocation(hotel.place[0].location, {icon: '/images/lodging_0star.png'}, hotel.name, '#hotel-list', thisDay, hotel._id);
+              }
+              restaraunts.forEach(function(rest){
+                  drawLocation(rest.place[0].location, {icon: '/images/restaurant.png'}, rest.name, '#restaurant-list', thisDay, rest._id);
+              });
+              things.forEach(function(thing){
+                  drawLocation(thing.place[0].location, {icon: '/images/star-3.png'}, thing.name, '#things-list', thisDay, thing._id);
+              });
+              removeDay(thisDay);
+              console.log("runin");
+              $('.day-buttons').append('<button class="btn btn-circle day-btn">'+(thisDay+1)+'</button>');
+              thisDay++;
+            });
+            $('.day-buttons').append('<button class="btn btn-circle day-btn btn-plus">+</button>');
+            $('.day-buttons').children().first().addClass('current-day');
+
+            //render buttons for each day
+
+            }
+
+            renderDay(0);
 
         },
         error: function(err){
@@ -109,7 +136,7 @@ $( document ).ready(function() {
 			daysArray[currDay].hotelExists = true;
       console.log("HERE, ", selectedVal);
 			daysArray[currDay].lastHotelId = drawLocation(locationArr, {
-	          icon: '/images/lodging_0star.png' 
+	          icon: '/images/lodging_0star.png'
 	        }, eName, typeStr, currDay, selectedVal);
 	    }
 		else if(typeStr[1]=='r'){
@@ -130,11 +157,24 @@ $( document ).ready(function() {
 
 	$('.itinerary-panel').on('click','button',function(){
 		// RED X MARKER DELETE BUTTON FOR ITINERARY PANEL
-
 		var $button = $(this);
 		var placeName = $button.siblings('span').text();
 
 		var markerToRemove = getMarker(daysArray[currDay].markersArray, placeName);
+
+    console.log("!")
+    $.ajax({
+      type: 'DELETE',
+      url: '/days/marker',
+      data: {day: currDay, name: placeName, type: markerToRemove.type, foreignKey: markerToRemove.foreignId},
+      success: function(data){
+        console.log(data);
+      },
+      error: function(data){
+        console.log(data);
+      }
+
+    });
 
 		if(markerToRemove.type[1] =='h'){
 			daysArray[currDay].hotelExists =false;
@@ -191,7 +231,7 @@ $( document ).ready(function() {
 	//remove  current day and adjust information
 		$('#day-title').on('click','button',function(){
 			//num of days counts buttons including 'plus', remove another
-			// for index 
+			// for index
 			var numOfDays = $('.day-buttons').children().length-2;
 
 			removeDay(currDay);
@@ -207,6 +247,14 @@ $( document ).ready(function() {
 	var removeDay = function(day){
 		//removes all itinerary items from current day from dom
 		$('.itinerary-item').remove();
+
+    $.ajax({
+      type:"DELETE",
+      url:"/days/"+currDay,
+      success: function(data){
+        console.log("hooray");
+      }
+    });
 
 		//hide previous days markers
 		var markersToRemove = daysArray[day].markersArray;
@@ -224,32 +272,36 @@ $( document ).ready(function() {
 
 		//show curr days markers
 		//debugger;
-		var currMarkers = daysArray[day].markersArray;
+    if(daysArray.length>0){
+      
+   
+  		var currMarkers = daysArray[day].markersArray;
 
-		currMarkers.forEach(function(marker){
-			marker.setVisible(true);
-			var typeStr = marker.type;
-			var locationName = marker.name;
-			var $locationListElement = $(typeStr).children('.list-group');
-			$locationListElement
-		    	.append('<div class="itinerary-item"><span class="title">'+locationName+'</span><button class="btn btn-xs btn-danger remove btn-circle">x</button></div>');
-			});
+  		currMarkers.forEach(function(marker){
+  			marker.setVisible(true);
+  			var typeStr = marker.type;
+  			var locationName = marker.name;
+  			var $locationListElement = $(typeStr).children('.list-group').last();
+  			$locationListElement
+  		    	.append('<div class="itinerary-item"><span class="title">'+locationName+'</span><button class="btn btn-xs btn-danger remove btn-circle">x</button></div>');
+  			});
 
-
+     }
 
 	};
 	/*********** GOOGLE MAPS API FUNCTIONS ******************/
 
 	 //draws and creates marker
      function drawLocation (location, opts, locationName, typeStr, currDay, foreignId) {
-          
+
           if (typeof opts !== 'object') opts = {};
           opts.position = new google.maps.LatLng(location[0], location[1]);
           opts.map = map;
+
           opts.id = daysArray[currDay].currMarkerId++;
           opts.name = locationName;
           opts.type = typeStr;
-          //opts.foreignId =
+          opts.foreignId = foreignId;
           var marker = new google.maps.Marker(opts);
 
           daysArray[currDay].markersArray[opts.id] = marker;
@@ -259,10 +311,10 @@ $( document ).ready(function() {
           //
             console.log("FI", foreignId);
             console.log('currDay',currDay);
-          $.ajax({  
+          $.ajax({
             type: 'PUT',
             url: 'days/' + currDay,
-            data: {'typeStr': typeStr.substring(1), key: foreignId },
+            data: {'typeStr': typeStr.substring(1), key: foreignId},
             success: function(success){
                 console.log("Success ", success);
               },
@@ -277,9 +329,9 @@ $( document ).ready(function() {
 
       var deleteMarker = function(id){
           var marker = daysArray[currDay].markersArray[id];
-          marker.name = null;
           marker.setVisible(false);
           marker.setMap(null);
+          daysArray[currDay].markersArray.splice(id,1);
       	  narrowBounds();
 
       };
@@ -295,7 +347,7 @@ $( document ).ready(function() {
       			temp.extend(position);
 
       		}
-      		
+
       	});
       	if(!temp.isEmpty()){
       		day.bounds = temp;

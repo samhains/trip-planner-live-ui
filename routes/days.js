@@ -1,40 +1,52 @@
 var router = require('express').Router();
 var Day = require('../models').Day;
 var Hotel = require('../models').Hotel;
+var Restaurant = require('../models').Restaurant;
+var ThingToDo = require('../models').ThingToDo;
 var async = require('async');
+var bluebird = require('bluebird');
 
 
 router.get('/', function (req, res, next){
 
-  Day.find({},function(error,days){
-   async.reduce(days, [],function(prev,day,callback){
+    Day.find({},function(err,days){
 
-      var funcs = [
-        function(other_callback){
-          Hotel.find({'id': day.hotel.id},function(err, data){
-            console.log(data);
-            console.log("!!!!!");
-            other_callback(data);
-          });
-        },
-        function(other_callback){
+      var allDaysPromise = bluebird.map(days,function(day){
+        if(day){
+            var thingsToDoIds = day.thingsToDo;
+            var hotelId = day.hotel;
+            var restaurantIds = day.restaurants;
 
-        },
-        function(other_callback){
+            var hotelPromise = Hotel.findOneAsync({'_id':hotelId});
 
-        },
-      ];
+            var restaurantPromise = bluebird.map(restaurantIds,function(restaurantId){
+              return Restaurant.findOneAsync({'_id':restaurantId});
+            });
 
+            var thingsPromise = bluebird.map(thingsToDoIds,function(thingsId){
+              return ThingToDo.findOneAsync({'_id':thingsId});
+            });
 
+            var dayPromises=[hotelPromise,restaurantPromise,thingsPromise];
 
-      async.parallel(funcs, function(err, data){
-
+            return bluebird.all(dayPromises);
+        }
       });
 
-    }, function(err, data){
+      allDaysPromise.then(function(days){
+        console.log("days",days);
+        res.send(days);
+      });
 
+
+      
     });
-  });
+
+
+
+
+
+
 
 
 });
@@ -43,10 +55,44 @@ router.get('/', function (req, res, next){
 
 // });
 
+
+router.delete('/marker', function (req, res, next){
+   console.log("!!!");
+    var name = req.body.name;
+    var day  = req.body.day;
+    var type = req.body.type;
+    var key = req.body.foreignKey;
+    console.log("!!!");
+    console.log(key)
+    if (type[1] == 'h'){
+      console.log("!!!!!");
+      Day.update({number: day}, {hotel: null}, function(err, data){
+        console.log(err, data);
+        res.send("death!");
+      });
+    }else if (type[1] == 'r'){
+      console.log(key)
+      Day.update({number: day}, {$pull: {restaurants: key}} , function(err, data){
+      res.send("death!");
+      });
+    }else if (type[1] == 't'){
+      Day.update({number: day}, {$pull: {thingsToDo: key}}, function(err, data){
+      res.send("death!");
+    });
+    }
+});
+
 router.delete('/:id', function (req, res, next){
-  //delete day by id
+  var id = req.params.id;
+  console.log("ID",id);
+  Day.find({number:id}).remove(function(err,data){
+    console.log(err,data);
+  });
+  res.send("DELETED DAY");
 
 });
+
+
 
 router.post('/:id', function (req, res, next){
   //create a new day
@@ -69,6 +115,8 @@ router.put('/:id', function (req, res, next){
   console.log(typeStr);
   console.log(dayToModify);
 
+
+
     if(typeStr[0]=='h'){
       Day.update({number:dayToModify},{hotel:foreignId},function(err,data){
         if(err) return next(err);
@@ -80,7 +128,8 @@ router.put('/:id', function (req, res, next){
 
     }
     else if(typeStr[0]=='r'){
-       Day.update({number:dayToModify},{$push: {restaurants:foreignId}},function(err,data){
+
+       Day.update({number:dayToModify},{$addToSet: {restaurants:foreignId}},function(err,data){
         if(err) return next(err);
         console.log("success",data);
 
@@ -88,7 +137,7 @@ router.put('/:id', function (req, res, next){
 
     }
     else if(typeStr[0]=='t'){
-       Day.update({number:dayToModify},{$push: {thingsToDo:foreignId}},function(err,data){
+       Day.update({number:dayToModify},{$addToSet: {thingsToDo:foreignId}},function(err,data){
         if(err) return next(err);
         console.log("success",data);
 
@@ -97,7 +146,7 @@ router.put('/:id', function (req, res, next){
 
     }
     //assign key to the relevant part of the day object
-    
+
   console.log(req.body);
   res.send("Days");
 

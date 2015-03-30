@@ -1,6 +1,8 @@
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/tripPlanner');
 mongoose.connection.on('error', console.error.bind(console, 'connection error:'));
+var bluebird = require('bluebird');
+bluebird.promisifyAll(require("mongoose"));
 
 var placeSchema = new mongoose.Schema({
   address: String,
