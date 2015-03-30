@@ -15,7 +15,7 @@
               <h4>Hotels</h4>
               <select>
               {% for hotel in hotels %}
-                <option>{{ hotel.name }}</option>
+                <option value="{{ hotel.id }}" >{{ hotel.name }}</option>
               {% endfor %}
               </select>
               <button class="btn btn-primary btn-circle pull-right">+</button>
@@ -24,7 +24,7 @@
               <h4>Restaurants</h4>
               <select>
               {% for restaurant in restaurants %}
-                <option>{{ restaurant.name }}</option>
+                <option value="{{restaurant.id}}">{{ restaurant.name }}</option>
               {% endfor %}
               </select>
               <button class="btn btn-primary btn-circle pull-right">+</button>
@@ -33,7 +33,7 @@
               <h4>Things To Do</h4>
               <select>
               {% for thingToDo in thingsToDo %}
-                <option>{{ thingToDo.name }}</option>
+                <option value="{{thingToDo.id}}">{{ thingToDo.name }}</option>
               {% endfor %}
               </select>
               <button class="btn btn-primary btn-circle pull-right">+</button>

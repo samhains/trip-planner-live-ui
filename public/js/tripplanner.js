@@ -9,6 +9,18 @@ $( document ).ready(function() {
     		this.lastHotelId= null;
     		this.bounds = new google.maps.LatLngBounds();
     	};
+
+        /*
+        var Marker = {
+  
+        }
+        this.position = new google.maps.LatLng(location[0], location[1]);
+          this.map = map;
+          this.id = markerId
+          this.name = locationName;
+          this.type = typeStr;
+         */
+
     	var daysArray = [new Day()];
     	var currDay = 0;
     	var prevDay;
@@ -19,13 +31,26 @@ $( document ).ready(function() {
         type: "GET",
         url:'/days',
         success: function(days){
-          console.log(days);
-          days.forEach(function(day){
+          console.log(days.length);
+          if (days.length == 0){
 
+          $.ajax({
+              type: "POST",
+              url: '/days/0',
+              success: function(days){
+                console.log(days);
+              },
+              error: function(error){
+                console.log(error);
+              }
           });
-            
-            var numOfDays = days.length;
-            console.log(days.length);
+
+
+          }else{
+          days.forEach(function(day){
+          });
+          }
+
         },
         error: function(err){
           console.log(err);
@@ -42,7 +67,8 @@ $( document ).ready(function() {
 
     	//finding option next to add button
     	var $selected = $button.siblings('select').find('option:selected');
-
+      var selectedVal =  $selected.val();
+      console.log("SV", selectedVal);
     	//getting name of  category
     	typeName = $button.siblings('h4').text();
 
@@ -81,19 +107,20 @@ $( document ).ready(function() {
     	var locationArr = result[0].place[0].location;
     	if(typeStr[1]=='h'){
 			daysArray[currDay].hotelExists = true;
+      console.log("HERE, ", selectedVal);
 			daysArray[currDay].lastHotelId = drawLocation(locationArr, {
-	          icon: '/images/lodging_0star.png'
-	        }, eName, typeStr, currDay);
+	          icon: '/images/lodging_0star.png' 
+	        }, eName, typeStr, currDay, selectedVal);
 	    }
 		else if(typeStr[1]=='r'){
 			drawLocation(locationArr, {
 	        	icon: '/images/restaurant.png'
-	      	},eName, typeStr, currDay);
+	      	},eName, typeStr, currDay, selectedVal);
 	    }
 		else if(typeStr[1]=='t'){
 			drawLocation(locationArr, {
             	icon: '/images/star-3.png'
-          	},eName, typeStr, currDay);
+          	},eName, typeStr, currDay, selectedVal);
 
 		}
 
@@ -129,8 +156,8 @@ $( document ).ready(function() {
 		//if we clicked a plus button- add a new day button/day array/id count
 		if($button.text() =='+'){
 			$button.prev().after('<button class="btn btn-circle day-btn">'+(numOfDays+1)+'</button>');
-
 			daysArray[numOfDays] = new Day();
+      console.log("days" + numOfDays);
       $.ajax({
         type: "POST",
         url: '/days/'+numOfDays,
@@ -214,19 +241,35 @@ $( document ).ready(function() {
 	/*********** GOOGLE MAPS API FUNCTIONS ******************/
 
 	 //draws and creates marker
-     function drawLocation (location, opts, locationName, typeStr) {
+     function drawLocation (location, opts, locationName, typeStr, currDay, foreignId) {
+          
           if (typeof opts !== 'object') opts = {};
           opts.position = new google.maps.LatLng(location[0], location[1]);
           opts.map = map;
           opts.id = daysArray[currDay].currMarkerId++;
           opts.name = locationName;
           opts.type = typeStr;
+          //opts.foreignId =
           var marker = new google.maps.Marker(opts);
 
           daysArray[currDay].markersArray[opts.id] = marker;
           daysArray[currDay].bounds.extend(marker.position);
           map.fitBounds(daysArray[currDay].bounds);
           //markers[opts.id]= marker;
+          //
+            console.log("FI", foreignId);
+            console.log('currDay',currDay);
+          $.ajax({  
+            type: 'PUT',
+            url: 'days/' + currDay,
+            data: {'typeStr': typeStr.substring(1), key: foreignId },
+            success: function(success){
+                console.log("Success ", success);
+              },
+            error: function(error){
+              console.log("Error ", error);
+            }
+          });
           return marker.id;
 
       }
